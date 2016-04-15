@@ -6,66 +6,40 @@ Chronograf is a simple to install graphing and visualization application that yo
 
 ## Using this image
 
-### Exposed Ports
-
--	10000 (default port)
-
-### Using the default configuration
-
-By default, Chronograf runs on localhost port `10000`. Chronograf exposes a shared volume under `/var/lib/chronograf`, which it uses to store database data. You can mount a host directory to `/var/lib/chronograf` for host access to persisted container data. A typical invocation of the Chronograf container might be:
+By default, Chronograf listens on port `10000` and stores its data in a volume at `/var/lib/chronograf`. You can start an instance with:
 
 ```console
-$ docker run --net=host \
-      -v /path/on/host:/var/lib/chronograf \
-      chronograf
+$ docker run -p 10000:10000 chronograf
 ```
 
-You can also have Docker control the volume mountpoint by using a named volume.
-
-```console
-$ docker run -p 10000:10000 \
-      -v chronograf:/var/lib/chronograf \
-      chronograf
-```
+You can also use a custom configuration file or environment variables to modify Chronograf settings.
 
 ### Using a custom config file
 
-Assuming a custom configuration file on your host at `/path/to/config.toml` you can mount a shared volume as follows:
+A sample configuration file can be obtained by:
 
 ```console
-$ docker run --net=host \
-      -v /path/to:/opt/chronograf:ro \
-      chronograf -config /opt/chronograf/config.toml
+$ docker run --rm chronograf -sample-config > chronograf.toml
 ```
 
-## Config variables
-
-Chronograf 0.10 has following config variables
-
-| FLAG                    | ENV VAR                               | DEFAULT VALUE                     |
-|-------------------------|---------------------------------------|-----------------------------------|
-| LocalDatabase           | CHRONOGRAF_LOCAL_DATABASE             | /var/lib/chronograf/chronograf.db |
-| QueryResponseBytesLimit | CHRONOGRAF_QUERY_RESPONSE_BYTES_LIMIT | 2500000                           |
-
-All of these can be provided in the config file or overrided using the environment variables
-
-### Binding to a different port
-
-To bind to a different port you can use Docker's `-p` flag. For example, to run Chronograf on port `9999`:
+Once you've customized `chronograf.conf`, you can run the Chronograf container with it mounted in the expected location (note the name change!):
 
 ```console
-docker run -p 9999:10000 chronograf
+$ docker run -d \
+      -p 10000:10000 \
+      -v /path/to/chronograf.toml:/opt/chronograf/config.toml
 ```
 
-### Using a different database file
+### Using environment variables (preferred)
 
-```console
-$ docker run --net=host \
-      -v /path/on/host/:/var/lib/other_chronograf.db \
-      --env CHRONOGRAF_LOCAL_DATABASE=/var/lib/other_chronograf db \
-      chronograf
-```
+You may have noticed that the default `Bind` value in the configuration is set to `127.0.0.1:10000`, though the container will listen on `0.0.0.0:10000` instead. This is due to a `CHRONOGRAF_BIND` environment variable being set in the Dockerfile to provide a sensible default within the Docker context. Other environment variables can override configuration settings following the `CamelCase` to `CHRONOGRAF_CAMEL_CASE` pattern:
 
-## Official Docs
+| SETTING                 | ENV VAR                               |
+|-------------------------|---------------------------------------|
+| Bind                    | CHRONOGRAF_BIND                       |
+| LocalDatabase           | CHRONOGRAF_LOCAL_DATABASE             |
+| QueryResponseBytesLimit | CHRONOGRAF_QUERY_RESPONSE_BYTES_LIMIT |
+
+## Official Documentation
 
 See the [official docs](https://docs.influxdata.com/chronograf/latest/introduction/getting_started/) for information on creating visualizations.

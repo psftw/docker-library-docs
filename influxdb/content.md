@@ -51,9 +51,7 @@ InfluxDB can be either configured from a config file or using environment variab
 Generate the default configuration file:
 
 ```console
-$ docker run --rm \
-      -v $PWD:/etc/influxdb \
-      influxdb bash -c 'influxd config > /etc/influxdb/influxdb.conf'
+$ docker run --rm influxdb influxd config > influxdb.conf
 ```
 
 Modify the default configuration, which will now be available under `$PWD`. Then start the InfluxDB container.
@@ -106,10 +104,16 @@ Start the container:
 $ docker run --name=influxdb -d -p 8083:8083 -p 8086:8086 influxdb
 ```
 
-Run the influx client in another container as such:
+Run the influx client in another container:
 
 ```console
 $ docker run --rm --link=influxdb -it influxdb influx -host influxdb
+```
+
+Alternatively, jump directly into the container:
+
+```console
+$ docker exec -it influxdb influx
 ```
 
 ### Web Administrator Interface
